@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(foodie)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dishes    Dish[]
+  Order     Order[]
+
+  @@map("users")
+}
+
+model Dish {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  imageUrl    String?
+  chef_id     String
+  chef        User     @relation(fields: [chef_id], references: [id])
+  Order       Order?   @relation(fields: [orderId], references: [id])
+  orderId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("dishes")
+}
+
+model Order {
+  id               String   @id @default(uuid())
+  quantity         Int
+  delivery_address String
+  payment_method   String
+  dishes           Dish[]
+  user_id          String
+  user             User     @relation(fields: [user_id], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("orders")
+}
+
+enum Role {
+  foodie
+  chef
+
+  @@map("roles")
+}
