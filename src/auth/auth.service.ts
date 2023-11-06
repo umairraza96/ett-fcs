@@ -2,19 +2,30 @@ import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createAuthDto: CreateAuthDto) {
-    const user = await this.prisma.user.create({
-      data: createAuthDto,
-    });
-    return user;
+    try {
+      const user = await this.prisma.user.create({
+        data: createAuthDto,
+      });
+
+      return user;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new Error(error.message);
+      }
+      throw new Error('Something Went Wrong');
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async findAll() {
+    const users = await this.prisma.user.findMany();
+
+    return users;
   }
 
   findOne(id: number) {

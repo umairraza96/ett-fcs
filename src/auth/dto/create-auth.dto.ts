@@ -6,7 +6,7 @@ export const createAuthSchema = z
   .object({
     email: z
       .string({
-        required_error: 'Username is required',
+        required_error: 'Email is required',
       })
       .email(),
     password: z.string({

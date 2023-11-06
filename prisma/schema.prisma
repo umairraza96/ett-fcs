@@ -24,33 +24,44 @@ model User {
 }
 
 model Dish {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   description String
   price       Float
   imageUrl    String?
   chef_id     String
-  chef        User     @relation(fields: [chef_id], references: [id])
-  Order       Order?   @relation(fields: [orderId], references: [id])
-  orderId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  chef        User        @relation(fields: [chef_id], references: [id])
+  order_items OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@map("dishes")
 }
 
 model Order {
-  id               String   @id @default(uuid())
+  id               String      @id @default(uuid())
   quantity         Int
   delivery_address String
   payment_method   String
-  dishes           Dish[]
   user_id          String
-  user             User     @relation(fields: [user_id], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  user             User        @relation(fields: [user_id], references: [id])
+  order_items      OrderItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  order_id  String
+  dish_id   String
+  order     Order    @relation(fields: [order_id], references: [id])
+  dish      Dish     @relation(fields: [dish_id], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_items")
 }
 
 enum Role {
