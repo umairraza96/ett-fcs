@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
+  Inject,
 } from '@nestjs/common';
 import { DishesService } from './dishes.service';
 import { CreateDishDto } from './dto/create-dish.dto';
@@ -14,18 +16,28 @@ import { UpdateDishDto } from './dto/update-dish.dto';
 import { CurrentUser } from 'src/common/decorators/currentuser.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Controller('dishes')
 export class DishesController {
-  constructor(private readonly dishesService: DishesService) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly dishesService: DishesService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
   @Roles(['chef'])
-  create(@CurrentUser() user: string, @Body() createDishDto: CreateDishDto) {
+  async create(
+    @CurrentUser() user: string,
+    @Body() createDishDto: CreateDishDto,
+  ) {
+    await this.cacheManager.del('/dishes');
     return this.dishesService.create(user, createDishDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get()
   findAll() {
     return this.dishesService.findAll();
