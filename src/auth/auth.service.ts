@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -16,7 +16,9 @@ export class AuthService {
       return user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        throw new Error(error.message);
+        throw new BadRequestException(
+          'You already have an account with this email',
+        );
       }
       throw new Error('Something Went Wrong');
     }
