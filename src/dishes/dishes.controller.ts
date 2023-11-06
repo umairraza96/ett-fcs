@@ -21,6 +21,7 @@ export class DishesController {
 
   @Post()
   @UseGuards(AuthGuard)
+  @Roles(['chef'])
   create(@CurrentUser() user: string, @Body() createDishDto: CreateDishDto) {
     return this.dishesService.create(user, createDishDto);
   }
